@@ -1,0 +1,32 @@
+NorBits Waypoint - Source-Available License
+Copyright (c) 2026 NorBits. All rights reserved.
+Permission requests: contact@norbits.co
+
+This source code is published for transparency: so that anyone can read
+it, audit it for malicious behaviour, and verify that the official 
+binaries correspond to this source. It is not open source.
+
+PERMITTED
+
+  1. You may view, read, and analyse this source code.
+  2. You may compile it locally for the sole purpose of verifying the
+     official builds.
+  3. You may download, install, and run the official builds published by
+     NorBits, for their intended purpose of connecting to NorBits game
+     servers.
+
+NOT PERMITTED without prior written permission from NorBits
+
+  1. Using this software, or any portion of it, in any other project.
+  2. Copying, modifying, or creating derivative works from it.
+  3. Redistributing it, in source or compiled form, modified or not.
+  4. Operating or offering it, or any derivative, as a service.
+  5. Using the NorBits name, logo, or branding.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
