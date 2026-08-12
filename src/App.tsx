@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import { invoke } from '@tauri-apps/api/core'
-
-type MinecraftDir = {
-  path: string
-  exists: boolean
-}
+import { client, type MinecraftDir } from "./lib/api";
 
 function App() {
   const [dir, setDir] = useState<MinecraftDir | null>(null)
@@ -12,7 +7,8 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    invoke<MinecraftDir | null>('find_minecraft_dir')
+    client
+    .findMinecraftDir()
     .then(setDir)
     .catch((e) => setError(String(e)))
     .finally(() => setLoading(false))
