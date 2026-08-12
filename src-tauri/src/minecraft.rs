@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MinecraftDir {
     pub path: String,
     pub exists: bool,
