@@ -9,7 +9,7 @@ export type Manifest = {
     loader: 'fabric'
     loaderVersion: string | null
     server: { name: string; address: string }
-    mods: { slug: string; required: boolean }[]
+    mods: { slug: string; required: boolean; name: string; blurb: string }[]
 }
 
 export type MinecraftDir = {
@@ -44,16 +44,6 @@ export type InstallProgress =
     | { stage: "done" }
     | { stage: "error"; message: string }
 
-export type PlayerSample = { name: string; uuid: string }
-
-export type ServerStatus = {
-    online: boolean
-    motd: string | null
-    players: { online: number; max: number; sample: PlayerSample[] } | null
-    versionName: string | null
-    latencyMs: number | null
-}
-
 // commands
 export const api = {
     findMinecraftDir: () => invoke<MinecraftDir | null>("find_minecraft_dir"),
@@ -65,9 +55,6 @@ export const api = {
 
     install: (plan: InstallPlan, mcDir: string) =>
         invoke<void>("install", { plan, mcDir }),
-
-    pingServer: (address: string) =>
-        invoke<ServerStatus>("ping_server", { address }),
 
     openModsFolder: (mcDir: string) =>
         invoke<void>("open_mods_folder", { mcDir } ),
@@ -92,7 +79,14 @@ const mocks: typeof api = {
         loader: "fabric",
         loaderVersion: null,
         server: { name: "NorBits MC", address: "mc.norbits.co" },
-        mods: [{ slug: 'simple-voice-chat', required: true }],
+        mods: [
+            { 
+                slug: 'simple-voice-chat', 
+                required: true,
+                name: "Voice Chat",
+                blurb: "Talk to players near you in-game", 
+            }
+        ],
     }),
 
     planInstall: async() => ({
@@ -148,22 +142,6 @@ const mocks: typeof api = {
         await sleep(400)
         emit({ stage: "done" })
     },
-
-    pingServer: async () => ({
-        online: true,
-        motd: "Norbits MC - Welcome Back!",
-        players: {
-            online: 3,
-            max: 25,
-            sample: [
-                { name: "Dwain", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5"},
-                { name: "Jerob", uuid: "853c80ef-3c37-49fd-aa49-938b674adae6"},
-                { name: "Luke", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6"},
-            ],
-        },
-        versionName: "Paper 26.1.2",
-        latencyMs: 42,
-    }),
 
     openModsFolder: async() => {}
 }
