@@ -1,1 +1,109 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+/* ── Dark theme (default) ─────────────────────────────────────────── */
+:root {
+  --wp-bar: #101215;
+  --wp-bar-border: #22262c;
+  --wp-bar-text: #b3bac3;
+  --wp-glyph: #8d949d;
+  --wp-body: #141026;
+  --wp-title: #f2f5f8;
+  --wp-sub: #98a0aa;
+  --wp-muted: #7f8792;
+  --wp-faint: #5f666e;
+  --wp-strong: #dbe0e6;
+  --wp-panel: #120d1f;
+  --wp-panel-border: #272c33;
+  --wp-panel-head: rgba(18, 13, 31, 0.62);
+  --wp-row-border: #23272e;
+  --wp-primary: #ffffff;
+  --wp-primary-text: #08181c;
+  --wp-primary-hover: #c9cdd2;
+  --wp-quiet: #8d949d;
+  --wp-quiet-hover: #c6ccd4;
+  --wp-ghost-bg: #24282e;
+  --wp-ghost-border: #3a4149;
+  --wp-ghost-text: #dbe0e6;
+  --wp-track: #2a2f36;
+  --wp-mono-strong: #aab2bb;
+  --wp-mono-faint: #6f7780;
+}
+
+/* ── Light theme ──────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --wp-bar: #f2f0f7;
+  --wp-bar-border: #e3e0ea;
+  --wp-bar-text: #4a4552;
+  --wp-glyph: #7b7686;
+  --wp-body: #fbfafe;
+  --wp-title: #191426;
+  --wp-sub: #5d5769;
+  --wp-muted: #6f6a7c;
+  --wp-faint: #9b96a6;
+  --wp-strong: #2a2438;
+  --wp-panel: #f7f5fb;
+  --wp-panel-border: #e5e2ee;
+  --wp-panel-head: #efecf7;
+  --wp-row-border: #e8e5f1;
+  --wp-primary: #5b3df5;
+  --wp-primary-text: #ffffff;
+  --wp-primary-hover: #7c5cff;
+  --wp-quiet: #6f6a7c;
+  --wp-quiet-hover: #191426;
+  --wp-ghost-bg: #ffffff;
+  --wp-ghost-border: #d8d4e2;
+  --wp-ghost-text: #2a2438;
+  --wp-track: #e6e3ee;
+  --wp-mono-strong: #4a4552;
+  --wp-mono-faint: #8b8697;
+}
+
+/* ── Static theme tokens ──────────────────────────────────────────── */
+@theme {
+  --color-wp-accent: #7c5cff;
+  --color-wp-green: #2fc532;
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+/* ── Dynamic theme tokens (swap with data-theme) ──────────────────── */
+@theme inline {
+  --color-wp-bar: var(--wp-bar);
+  --color-wp-bar-border: var(--wp-bar-border);
+  --color-wp-bar-text: var(--wp-bar-text);
+  --color-wp-glyph: var(--wp-glyph);
+  --color-wp-body: var(--wp-body);
+  --color-wp-title: var(--wp-title);
+  --color-wp-sub: var(--wp-sub);
+  --color-wp-muted: var(--wp-muted);
+  --color-wp-faint: var(--wp-faint);
+  --color-wp-strong: var(--wp-strong);
+  --color-wp-panel: var(--wp-panel);
+  --color-wp-panel-border: var(--wp-panel-border);
+  --color-wp-panel-head: var(--wp-panel-head);
+  --color-wp-row-border: var(--wp-row-border);
+  --color-wp-primary: var(--wp-primary);
+  --color-wp-primary-text: var(--wp-primary-text);
+  --color-wp-primary-hover: var(--wp-primary-hover);
+  --color-wp-quiet: var(--wp-quiet);
+  --color-wp-quiet-hover: var(--wp-quiet-hover);
+  --color-wp-ghost-bg: var(--wp-ghost-bg);
+  --color-wp-ghost-border: var(--wp-ghost-border);
+  --color-wp-ghost-text: var(--wp-ghost-text);
+  --color-wp-track: var(--wp-track);
+  --color-wp-mono-strong: var(--wp-mono-strong);
+  --color-wp-mono-faint: var(--wp-mono-faint);
+}
+
+/* ── Animations ───────────────────────────────────────────────────── */
+@keyframes wp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+body {
+  margin: 0;
+}
