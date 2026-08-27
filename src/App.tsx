@@ -12,7 +12,7 @@ function App() {
 
   return (
     <div className="flex min-h-screen flex-col font-sans">
-      {/* ── Title bar ─────────────────────────────────────────────── */}
+      {/* Title bar */}
       <header
         data-tauri-drag-region=""
         className="border-wp-bar-border bg-wp-bar flex h-[38px] shrink-0 items-center justify-between border-b px-3"
@@ -37,7 +37,7 @@ function App() {
         </button>
       </header>
 
-      {/* ── Content area ──────────────────────────────────────────── */}
+      {/* Content area */}
       <main className="bg-wp-body grid flex-1 place-items-center p-10">
         <p className="text-wp-sub text-[15px]">Content goes here</p>
       </main>

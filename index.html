@@ -11,6 +11,15 @@
         if (t === "light") document.documentElement.setAttribute("data-theme", "light");
       })();
     </script>
+    <style>
+      /* Painted before the stylesheet loads. Keep in sync with --wp-body. */
+      :root {
+        background: #141026;
+      }
+      :root[data-theme="light"] {
+        background: #fbfafe;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
