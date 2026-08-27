@@ -4,7 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>norbits-mc-setup</title>
+    <title>NorBits Waypoint</title>
+    <script>
+      (function () {
+        var t = localStorage.getItem("wp-theme");
+        if (t === "light") document.documentElement.setAttribute("data-theme", "light");
+      })();
+    </script>
+    <style>
+      /* Painted before the stylesheet loads. Keep in sync with --wp-body. */
+      :root {
+        background: #141026;
+      }
+      :root[data-theme="light"] {
+        background: #fbfafe;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -1,51 +1,47 @@
 import { useEffect, useState } from "react";
-import { client, type MinecraftDir } from "./lib/api";
 
 function App() {
-  const [dir, setDir] = useState<MinecraftDir | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [themeName, setThemeName] = useState<"dark" | "light">(
+    () => (localStorage.getItem("wp-theme") as "dark" | "light") || "dark"
+  );
 
   useEffect(() => {
-    client
-      .findMinecraftDir()
-      .then(setDir)
-      .catch((e) => setError(String(e)))
-      .finally(() => setLoading(false));
-  }, []);
+    document.documentElement.setAttribute("data-theme", themeName);
+    localStorage.setItem("wp-theme", themeName);
+  }, [themeName]);
 
   return (
-    <main className="min-h-screen bg-neutral-950 p-10 text-neutral-100">
-      <h1 className="text-2xl font-semibold">Norbits Waypoint</h1>
-      <p className="mt-1 text-sm text-neutral-400">Server setup &amp; status</p>
+    <div className="flex min-h-screen flex-col font-sans">
+      {/* Title bar */}
+      <header
+        data-tauri-drag-region=""
+        className="border-wp-bar-border bg-wp-bar flex h-[38px] shrink-0 items-center justify-between border-b px-3"
+      >
+        <div className="flex items-center gap-2">
+          <div className="bg-wp-accent grid h-[15px] w-[15px] shrink-0 place-items-center rounded-full">
+            <div className="bg-wp-bar h-[5.5px] w-[5.5px] rotate-45" />
+          </div>
+          <span className="text-wp-bar-text text-xs">NorBits Waypoint</span>
+        </div>
+        <button
+          onClick={() => setThemeName((p) => (p === "dark" ? "light" : "dark"))}
+          title={themeName === "dark" ? "Switch to light" : "Switch to dark"}
+          className="text-wp-glyph grid h-[38px] w-[42px] cursor-pointer place-items-center border-0 bg-transparent hover:bg-[rgba(127,127,127,.16)]"
+        >
+          <span
+            className="block h-[13px] w-[13px] rounded-full border-2 border-current"
+            style={{
+              background: "linear-gradient(90deg, currentColor 0 50%, transparent 50% 100%)",
+            }}
+          />
+        </button>
+      </header>
 
-      <section className="mt-8 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
-        <h2 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-          Minecraft folder
-        </h2>
-
-        {loading && <p className="mt-2 text-sm text-neutral-400">Looking...</p>}
-
-        {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
-
-        {!loading && !error && dir === null && (
-          <p className="mt-2 text-sm text-amber-400">Couldn&apos;t work out your home folder.</p>
-        )}
-
-        {dir && (
-          <>
-            <p className="mt-2 font-mono text-sm break-all">{dir.path}</p>
-            <p className="mt-2 text-sm">
-              {dir.exists ? (
-                <span className="text-emerald-400">Found</span>
-              ) : (
-                <span className="text-amber-400">Not found - no Java Minecraft install here</span>
-              )}
-            </p>
-          </>
-        )}
-      </section>
-    </main>
+      {/* Content area */}
+      <main className="bg-wp-body grid flex-1 place-items-center p-10">
+        <p className="text-wp-sub text-[15px]">Content goes here</p>
+      </main>
+    </div>
   );
 }
 
