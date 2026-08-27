@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+
+# A new push to the same PR cancels the run still in flight.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Reads the version from packageManager in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Fails if the lockfile disagrees with package.json, rather than quietly resolving something different from what we have locally.
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm check
+
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The webview crates link against these, so they're needed even to typecheck.
+      - name: Install Linux Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf libxdo-dev
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # generate_context! embeds the frontend at compile time, so dist/ has to exist before cargo runs - including for `cargo check`.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      # No toolchain action: the runners ship rustup, and rust-toolchain.toml makes the first cargo call install 1.94.1 with rustfmt and clippy.
+      # Declaring the version here too would give us a second source of truth.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: cargo fmt
+        working-directory: src-tauri
+        run: cargo fmt --check
+
+      - name: cargo clippy
+        working-directory: src-tauri
+        run: cargo clippy -- -D warnings
+
+      - name: cargo check
+        working-directory: src-tauri
+        run: cargo check
