@@ -1,5 +1,9 @@
+mod fabric;
+mod http;
+mod install;
 mod manifest;
 mod minecraft;
+mod modrinth;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,7 +20,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             minecraft::find_minecraft_dir,
-            manifest::load_manifest
+            manifest::load_manifest,
+            install::plan_install
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
