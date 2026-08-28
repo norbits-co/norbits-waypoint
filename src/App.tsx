@@ -78,7 +78,7 @@ function App() {
           <div className="bg-wp-accent grid h-[15px] w-[15px] shrink-0 place-items-center rounded-full">
             <div className="bg-wp-bar h-[5.5px] w-[5.5px] rotate-45" />
           </div>
-          <span className="text-wp-bar-text text-xs">NorBits Waypoint</span>
+          <span className="text-wp-bar-text text-xs font-medium">NorBits Waypoint</span>
         </div>
         <button
           onClick={() => setThemeName((p) => (p === "dark" ? "light" : "dark"))}
@@ -102,7 +102,7 @@ function App() {
               className="border-wp-track border-t-wp-accent h-8 w-8 rounded-full border-[3px]"
               style={{ animation: "wp-spin 0.8s linear infinite" }}
             />
-            <p className="text-wp-sub text-[15px]">Looking for Minecraft on this PC…</p>
+            <p className="text-wp-sub text-[15px] font-medium">Looking for Minecraft…</p>
           </div>
         )}
 
@@ -121,8 +121,7 @@ function App() {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <p className="text-wp-title text-[15px] font-medium">Found your Minecraft folder</p>
-            <p className="text-wp-mono-strong font-mono text-[13px]">{status.dir.path}</p>
+            <p className="text-wp-title text-[15px] font-medium">Found Minecraft!</p>
           </div>
         )}
 
@@ -142,20 +141,25 @@ function App() {
               </svg>
             </div>
             <p className="text-wp-title text-[15px] font-medium">
-              Your version of Minecraft doesn't need anything installed
+              Oh!, Look Like You're On Minecraft Bedrock Edition : )
             </p>
             <p className="text-wp-sub text-[14px]">
-              You're all set — just open Minecraft and connect to the server:
+              You're all set! - just open Minecraft and connect to the server:
             </p>
-            <div className="flex items-center gap-2">
-              <span className="text-wp-mono-strong font-mono text-[14px]">
-                {status.manifest.server.address}
-              </span>
+            <div className="border-wp-panel-border bg-wp-panel flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-3">
+              <div className="flex flex-col gap-0.5 text-left">
+                <span className="text-wp-muted text-[11px] tracking-wide uppercase">
+                  Server address
+                </span>
+                <span className="text-wp-title font-mono text-[17px]">
+                  {status.manifest.server.address}
+                </span>
+              </div>
               <button
                 onClick={() => handleCopy(status.manifest.server.address)}
-                className="text-wp-muted hover:text-wp-title cursor-pointer border-0 bg-transparent p-1"
-                title="Copy server address"
-                aria-label="Copy server address"
+                className="border-wp-ghost-border bg-wp-ghost-bg text-wp-ghost-text hover:border-wp-accent grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-md border"
+                title="Copy Server Address"
+                aria-label="Copy Server Address"
               >
                 {copied ? (
                   <svg
@@ -165,7 +169,7 @@ function App() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -177,7 +181,7 @@ function App() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                   >
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
@@ -186,15 +190,15 @@ function App() {
               </button>
             </div>
             <p className="text-wp-muted text-[13px]">
-              Voice chat is only available on Java Edition — Bedrock players can still join and
-              play, just without voice.
+              Certain add-ons are only available on Java Edition - Bedrock players can still join
+              and play.
             </p>
           </div>
         )}
 
         {status.kind === "failed" && (
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-wp-title text-[15px] font-medium">Something went wrong</p>
+            <p className="text-wp-title text-[15px] font-medium">Something Went Wrong... : /</p>
             <p className="text-wp-sub text-[14px]">
               {status.reason === "manifest"
                 ? "Couldn't reach NorBits. Check your internet connection and try again."
