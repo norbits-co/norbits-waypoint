@@ -6,11 +6,16 @@ type Status =
   | { kind: "found"; dir: MinecraftDir; manifest: Manifest }
   | { kind: "confirm"; dir: MinecraftDir; manifest: Manifest; plan: InstallPlan }
   | { kind: "bedrock"; manifest: Manifest }
-  | { kind: "failed"; reason: "minecraft" | "manifest" | "plan" };
+  | { kind: "failed"; reason: "minecraft" | "manifest" | "plan"; message?: string };
 
 function formatBytes(bytes: number): string {
   if (bytes < 1_000_000) return `${(bytes / 1_000).toFixed(0)} KB`;
   return `${(bytes / 1_000_000).toFixed(1)} MB`;
+}
+
+function formatModNames(names: string[]): string {
+  if (names.length <= 2) return names.join(" & ");
+  return `${names[0]} & ${names[1]} and ${names.length - 2} more`;
 }
 
 function App() {
@@ -68,8 +73,8 @@ function App() {
     try {
       const plan = await client.planInstall(manifest, dir.path);
       setStatus({ kind: "confirm", dir, manifest, plan });
-    } catch {
-      setStatus({ kind: "failed", reason: "plan" });
+    } catch (e) {
+      setStatus({ kind: "failed", reason: "plan", message: String(e) });
     }
   }
 
@@ -150,7 +155,7 @@ function App() {
         {status.kind === "confirm" && (
           <div className="flex w-full max-w-md flex-col items-center gap-6">
             <p className="text-wp-title text-center text-[17px] font-medium">
-              Adding {status.manifest.mods.map((m) => m.name).join(" & ")} to your game!
+              Adding {formatModNames(status.manifest.mods.map((m) => m.name))} to your game!
             </p>
 
             <div className="border-wp-panel-border bg-wp-panel w-full rounded-lg border">
@@ -205,6 +210,14 @@ function App() {
 
             <button className="bg-wp-primary text-wp-primary-text hover:bg-wp-primary-hover w-full cursor-pointer rounded-lg py-3 text-[15px] font-medium">
               Install
+            </button>
+            <button
+              onClick={() =>
+                setStatus({ kind: "found", dir: status.dir, manifest: status.manifest })
+              }
+              className="text-wp-muted hover:text-wp-sub cursor-pointer border-0 bg-transparent text-[13px]"
+            >
+              Not now
             </button>
           </div>
         )}
@@ -284,9 +297,11 @@ function App() {
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-wp-title text-[15px] font-medium">Something Went Wrong... : /</p>
             <p className="text-wp-sub text-[14px]">
-              {status.reason === "manifest"
-                ? "Couldn't reach NorBits. Check your internet connection and try again."
-                : "We couldn't check for Minecraft on this computer. Try restarting the app."}
+              {status.reason === "plan" && status.message
+                ? status.message
+                : status.reason === "manifest"
+                  ? "Couldn't reach NorBits. Check your internet connection and try again."
+                  : "We couldn't check for Minecraft on this computer. Try restarting the app."}
             </p>
           </div>
         )}
