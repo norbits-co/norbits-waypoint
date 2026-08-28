@@ -1,7 +1,6 @@
 use std::time::Duration;
 
-// Modrinth requires a UA identifying the app with a contact address.
-// A generic one gets rate-limited or blocked outright.
+// Modrinth requires a UA identifying the app with a contact address. A generic one gets rate-limited or blocked outright.
 const UA: &str = concat!(
     "norbits-co/norbits-waypoint/",
     env!("CARGO_PKG_VERSION"),

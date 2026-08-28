@@ -11,15 +11,13 @@ pub struct InstallPlan {
     pub mods: Vec<PlannedMod>,
     pub loader_version: String,
     pub total_bytes: u64,
-    /// Jars from a previous install this one supersedes. Always empty until
-    /// install-state tracking lands in #16.
+    /// Jars from a previous install this one supersedes. Always empty until install-state tracking lands in #16.
     pub stale_files: Vec<String>,
 }
 
 #[tauri::command]
 pub async fn plan_install(manifest: Manifest, mc_dir: String) -> Result<InstallPlan, String> {
-    // Needed for stale-file detection in #16. Kept in the signature now so the
-    // contract doesn't have to change later.
+    // Needed for stale-file detection in #16. Kept in the signature now so the contract doesn't have to change later.
     let _ = &mc_dir;
 
     let client = http::client()?;

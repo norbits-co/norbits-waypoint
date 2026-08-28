@@ -6,9 +6,7 @@ use crate::manifest::Manifest;
 
 const API: &str = "https://api.modrinth.com/v2";
 
-// Modrinth's shapes. serde ignores fields we don't declare.
-// No rename_all here — their JSON is snake_case already.
-
+// Modrinth's shapes. serde ignores fields we don't declare. No rename_all here - their JSON is snake_case already.
 #[derive(Debug, Deserialize)]
 struct ApiVersion {
     project_id: String,
@@ -93,8 +91,7 @@ pub async fn resolve_mods(
     client: &reqwest::Client,
     manifest: &Manifest,
 ) -> Result<Vec<PlannedMod>, String> {
-    // A worklist, not recursion: async recursion needs boxing and a queue reads
-    // better anyway. (id, was it asked for, name to show a player)
+    // A worklist, not recursion: async recursion needs boxing and a queue reads better anyway. (id, was it asked for, name to show a player)
     let mut queue: VecDeque<(String, bool, String)> = manifest
         .mods
         .iter()
@@ -118,8 +115,7 @@ pub async fn resolve_mods(
         )
         .await?;
 
-        // We may have arrived here by slug ("simple-voice-chat") while a
-        // dependency refers to the same project by id ("9eGKb6K1"). Record both,
+        // We may have arrived here by slug ("simple-voice-chat") while a dependency refers to the same project by id ("9eGKb6K1"). Record both,
         // or we fetch and install the same mod twice.
         seen.insert(id.clone());
         seen.insert(version.project_id.clone());
@@ -128,15 +124,14 @@ pub async fn resolve_mods(
             if dep.dependency_type == "required" {
                 if let Some(pid) = &dep.project_id {
                     if !seen.contains(pid) {
-                        // Dependencies have no player-facing name of their own,
-                        // so borrow the name of whatever pulled them in.
+                        // Dependencies have no player-facing name of their own, so borrow the name of whatever pulled them in.
                         queue.push_back((pid.clone(), false, display_name.clone()));
                     }
                 }
             }
         }
 
-        // `primary` marks the mod jar; the rest are sources and javadoc.
+        // primary marks the mod jar; the rest are sources and javadoc.
         let file = version
             .files
             .iter()
