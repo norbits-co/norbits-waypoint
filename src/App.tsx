@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { client, type Manifest, type MinecraftDir } from "./lib/api";
+import { client, type InstallPlan, type Manifest, type MinecraftDir } from "./lib/api";
 
 type Status =
   | { kind: "searching" }
   | { kind: "found"; dir: MinecraftDir; manifest: Manifest }
+  | { kind: "confirm"; dir: MinecraftDir; manifest: Manifest; plan: InstallPlan }
   | { kind: "bedrock"; manifest: Manifest }
-  | { kind: "failed"; reason: "minecraft" | "manifest" };
+  | { kind: "failed"; reason: "minecraft" | "manifest" | "plan" };
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1_000_000) return `${(bytes / 1_000).toFixed(0)} KB`;
+  return `${(bytes / 1_000_000).toFixed(1)} MB`;
+}
 
 function App() {
   const [themeName, setThemeName] = useState<"dark" | "light">(
@@ -13,6 +19,7 @@ function App() {
   );
   const [status, setStatus] = useState<Status>({ kind: "searching" });
   const [copied, setCopied] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", themeName);
@@ -56,6 +63,15 @@ function App() {
       cancelled = true;
     };
   }, []);
+
+  async function handleSetup(dir: MinecraftDir, manifest: Manifest) {
+    try {
+      const plan = await client.planInstall(manifest, dir.path);
+      setStatus({ kind: "confirm", dir, manifest, plan });
+    } catch {
+      setStatus({ kind: "failed", reason: "plan" });
+    }
+  }
 
   function handleCopy(address: string) {
     navigator.clipboard.writeText(address).then(
@@ -107,7 +123,7 @@ function App() {
         )}
 
         {status.kind === "found" && (
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-5">
             <div className="bg-wp-green grid h-10 w-10 place-items-center rounded-full">
               <svg
                 viewBox="0 0 24 24"
@@ -122,6 +138,74 @@ function App() {
               </svg>
             </div>
             <p className="text-wp-title text-[15px] font-medium">Found Minecraft!</p>
+            <button
+              onClick={() => handleSetup(status.dir, status.manifest)}
+              className="bg-wp-primary text-wp-primary-text hover:bg-wp-primary-hover cursor-pointer rounded-lg px-6 py-2.5 text-[14px] font-medium"
+            >
+              Set up my game
+            </button>
+          </div>
+        )}
+
+        {status.kind === "confirm" && (
+          <div className="flex w-full max-w-md flex-col items-center gap-6">
+            <p className="text-wp-title text-center text-[17px] font-medium">
+              Adding {status.manifest.mods.map((m) => m.name).join(" & ")} to your game!
+            </p>
+
+            <div className="border-wp-panel-border bg-wp-panel w-full rounded-lg border">
+              <div className="border-wp-row-border flex items-center justify-between border-b px-4 py-3">
+                <span className="text-wp-strong text-[14px]">
+                  {status.plan.mods.length} {status.plan.mods.length === 1 ? "file" : "files"} to
+                  download
+                </span>
+                <span className="text-wp-muted text-[14px]">
+                  {formatBytes(status.plan.totalBytes)}
+                </span>
+              </div>
+
+              <div className="px-4 py-3">
+                <button
+                  onClick={() => setShowDetails((p) => !p)}
+                  className="text-wp-muted hover:text-wp-sub flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-[13px]"
+                  aria-expanded={showDetails}
+                >
+                  <span>What's being installed?</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 transition-transform"
+                    style={{ transform: showDetails ? "rotate(180deg)" : "rotate(0deg)" }}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+
+                {showDetails && (
+                  <ul className="mt-3 flex flex-col gap-2">
+                    {status.plan.mods.map((mod) => (
+                      <li key={mod.filename} className="text-wp-mono-faint font-mono text-[12px]">
+                        {mod.filename}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            {status.plan.staleFiles.length > 0 && (
+              <p className="text-wp-muted text-center text-[13px]">
+                Older versions will be replaced.
+              </p>
+            )}
+
+            <button className="bg-wp-primary text-wp-primary-text hover:bg-wp-primary-hover w-full cursor-pointer rounded-lg py-3 text-[15px] font-medium">
+              Install
+            </button>
           </div>
         )}
 
