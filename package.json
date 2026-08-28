@@ -1,7 +1,7 @@
 {
   "name": "norbits-mc-setup",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.2.6",
   "packageManager": "pnpm@10.33.0",
   "type": "module",
   "scripts": {
