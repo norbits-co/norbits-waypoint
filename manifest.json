@@ -1,0 +1,17 @@
+{
+  "mcVersion": "26.1.2",
+  "loader": "fabric",
+  "loaderVersion": null,
+  "server": {
+    "name": "NorBits MC",
+    "address": "mc.norbits.co"
+  },
+  "mods": [
+    {
+      "slug": "simple-voice-chat",
+      "required": true,
+      "name": "Voice Chat",
+      "blurb": "Talk to players near you in-game"
+    }
+  ]
+}
