@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "dev:mock": "vite --mode mock",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
