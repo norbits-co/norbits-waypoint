@@ -5,7 +5,7 @@ type Status =
   | { kind: "searching" }
   | { kind: "found"; dir: MinecraftDir; manifest: Manifest }
   | { kind: "bedrock"; manifest: Manifest }
-  | { kind: "failed" };
+  | { kind: "failed"; reason: "minecraft" | "manifest" };
 
 function App() {
   const [themeName, setThemeName] = useState<"dark" | "light">(
@@ -23,23 +23,31 @@ function App() {
     let cancelled = false;
 
     async function init() {
+      let dir: MinecraftDir | null;
+      let manifest: Manifest;
+
       try {
-        const [dir, manifest] = await Promise.all([
-          client.findMinecraftDir(),
-          client.loadManifest(),
-        ]);
-
-        if (cancelled) return;
-
-        if (!dir) {
-          setStatus({ kind: "failed" });
-        } else if (!dir.exists) {
-          setStatus({ kind: "bedrock", manifest });
-        } else {
-          setStatus({ kind: "found", dir, manifest });
-        }
+        dir = await client.findMinecraftDir();
       } catch {
-        if (!cancelled) setStatus({ kind: "failed" });
+        if (!cancelled) setStatus({ kind: "failed", reason: "minecraft" });
+        return;
+      }
+
+      try {
+        manifest = await client.loadManifest();
+      } catch {
+        if (!cancelled) setStatus({ kind: "failed", reason: "manifest" });
+        return;
+      }
+
+      if (cancelled) return;
+
+      if (!dir) {
+        setStatus({ kind: "failed", reason: "minecraft" });
+      } else if (!dir.exists) {
+        setStatus({ kind: "bedrock", manifest });
+      } else {
+        setStatus({ kind: "found", dir, manifest });
       }
     }
 
@@ -50,10 +58,13 @@ function App() {
   }, []);
 
   function handleCopy(address: string) {
-    navigator.clipboard.writeText(address).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(address).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => {}
+    );
   }
 
   return (
@@ -88,7 +99,7 @@ function App() {
         {status.kind === "searching" && (
           <div className="flex flex-col items-center gap-4">
             <div
-              className="border-wp-track h-8 w-8 rounded-full border-[3px] border-t-[#7c5cff]"
+              className="border-wp-track border-t-wp-accent h-8 w-8 rounded-full border-[3px]"
               style={{ animation: "wp-spin 0.8s linear infinite" }}
             />
             <p className="text-wp-sub text-[15px]">Looking for Minecraft on this PC…</p>
@@ -111,7 +122,7 @@ function App() {
               </svg>
             </div>
             <p className="text-wp-title text-[15px] font-medium">Found your Minecraft folder</p>
-            <p className="text-wp-mono-faint font-mono text-[13px]">{status.dir.path}</p>
+            <p className="text-wp-mono-strong font-mono text-[13px]">{status.dir.path}</p>
           </div>
         )}
 
@@ -144,6 +155,7 @@ function App() {
                 onClick={() => handleCopy(status.manifest.server.address)}
                 className="text-wp-muted hover:text-wp-title cursor-pointer border-0 bg-transparent p-1"
                 title="Copy server address"
+                aria-label="Copy server address"
               >
                 {copied ? (
                   <svg
@@ -173,6 +185,10 @@ function App() {
                 )}
               </button>
             </div>
+            <p className="text-wp-muted text-[13px]">
+              Voice chat is only available on Java Edition — Bedrock players can still join and
+              play, just without voice.
+            </p>
           </div>
         )}
 
@@ -180,7 +196,9 @@ function App() {
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-wp-title text-[15px] font-medium">Something went wrong</p>
             <p className="text-wp-sub text-[14px]">
-              We couldn't check for Minecraft on this computer. Try restarting the app.
+              {status.reason === "manifest"
+                ? "Couldn't reach NorBits. Check your internet connection and try again."
+                : "We couldn't check for Minecraft on this computer. Try restarting the app."}
             </p>
           </div>
         )}
