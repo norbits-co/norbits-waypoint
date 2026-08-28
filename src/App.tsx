@@ -1,14 +1,71 @@
 import { useEffect, useState } from "react";
+import { client, type Manifest, type MinecraftDir } from "./lib/api";
+
+type Status =
+  | { kind: "searching" }
+  | { kind: "found"; dir: MinecraftDir; manifest: Manifest }
+  | { kind: "bedrock"; manifest: Manifest }
+  | { kind: "failed"; reason: "minecraft" | "manifest" };
 
 function App() {
   const [themeName, setThemeName] = useState<"dark" | "light">(
     () => (localStorage.getItem("wp-theme") as "dark" | "light") || "dark"
   );
+  const [status, setStatus] = useState<Status>({ kind: "searching" });
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", themeName);
     localStorage.setItem("wp-theme", themeName);
   }, [themeName]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      let dir: MinecraftDir | null;
+      let manifest: Manifest;
+
+      try {
+        dir = await client.findMinecraftDir();
+      } catch {
+        if (!cancelled) setStatus({ kind: "failed", reason: "minecraft" });
+        return;
+      }
+
+      try {
+        manifest = await client.loadManifest();
+      } catch {
+        if (!cancelled) setStatus({ kind: "failed", reason: "manifest" });
+        return;
+      }
+
+      if (cancelled) return;
+
+      if (!dir) {
+        setStatus({ kind: "failed", reason: "minecraft" });
+      } else if (!dir.exists) {
+        setStatus({ kind: "bedrock", manifest });
+      } else {
+        setStatus({ kind: "found", dir, manifest });
+      }
+    }
+
+    init();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function handleCopy(address: string) {
+    navigator.clipboard.writeText(address).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => {}
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col font-sans">
@@ -21,7 +78,7 @@ function App() {
           <div className="bg-wp-accent grid h-[15px] w-[15px] shrink-0 place-items-center rounded-full">
             <div className="bg-wp-bar h-[5.5px] w-[5.5px] rotate-45" />
           </div>
-          <span className="text-wp-bar-text text-xs">NorBits Waypoint</span>
+          <span className="text-wp-bar-text text-xs font-medium">NorBits Waypoint</span>
         </div>
         <button
           onClick={() => setThemeName((p) => (p === "dark" ? "light" : "dark"))}
@@ -39,7 +96,116 @@ function App() {
 
       {/* Content area */}
       <main className="bg-wp-body grid flex-1 place-items-center p-10">
-        <p className="text-wp-sub text-[15px]">Content goes here</p>
+        {status.kind === "searching" && (
+          <div className="flex flex-col items-center gap-4">
+            <div
+              className="border-wp-track border-t-wp-accent h-8 w-8 rounded-full border-[3px]"
+              style={{ animation: "wp-spin 0.8s linear infinite" }}
+            />
+            <p className="text-wp-sub text-[15px] font-medium">Looking for Minecraft…</p>
+          </div>
+        )}
+
+        {status.kind === "found" && (
+          <div className="flex flex-col items-center gap-3">
+            <div className="bg-wp-green grid h-10 w-10 place-items-center rounded-full">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <p className="text-wp-title text-[15px] font-medium">Found Minecraft!</p>
+          </div>
+        )}
+
+        {status.kind === "bedrock" && (
+          <div className="flex max-w-sm flex-col items-center gap-4 text-center">
+            <div className="bg-wp-green grid h-10 w-10 place-items-center rounded-full">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <p className="text-wp-title text-[15px] font-medium">
+              Oh!, Look Like You're On Minecraft Bedrock Edition : )
+            </p>
+            <p className="text-wp-sub text-[14px]">
+              You're all set! - just open Minecraft and connect to the server:
+            </p>
+            <div className="border-wp-panel-border bg-wp-panel flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-3">
+              <div className="flex flex-col gap-0.5 text-left">
+                <span className="text-wp-muted text-[11px] tracking-wide uppercase">
+                  Server address
+                </span>
+                <span className="text-wp-title font-mono text-[17px]">
+                  {status.manifest.server.address}
+                </span>
+              </div>
+              <button
+                onClick={() => handleCopy(status.manifest.server.address)}
+                className="border-wp-ghost-border bg-wp-ghost-bg text-wp-ghost-text hover:border-wp-accent grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-md border"
+                title="Copy Server Address"
+                aria-label="Copy Server Address"
+              >
+                {copied ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <p className="text-wp-muted text-[13px]">
+              Certain add-ons are only available on Java Edition - Bedrock players can still join
+              and play.
+            </p>
+          </div>
+        )}
+
+        {status.kind === "failed" && (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="text-wp-title text-[15px] font-medium">Something Went Wrong... : /</p>
+            <p className="text-wp-sub text-[14px]">
+              {status.reason === "manifest"
+                ? "Couldn't reach NorBits. Check your internet connection and try again."
+                : "We couldn't check for Minecraft on this computer. Try restarting the app."}
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );
