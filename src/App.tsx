@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { SiDiscord } from "@icons-pack/react-simple-icons";
+import { Check, ChevronDown, Copy, Folder, LoaderCircle } from "lucide-react";
 import { client, type InstallPlan, type Manifest, type MinecraftDir } from "./lib/api";
+import { Button } from "./components/Button";
 
 type Status =
   | { kind: "searching" }
@@ -13,8 +16,13 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1_000_000).toFixed(1)} MB`;
 }
 
-// Tauri rejects with the plain string from Err(String); the mocks throw an
-// Error object. Normalise both so no "Error:" prefix reaches a player.
+const DISCORD_URL = "https://discord.gg/YUmeSeVMGc";
+
+// Messages with "let us know" will display 2 buttons
+function asksForContact(message: string): boolean {
+  return message.includes("let us know");
+}
+
 function errorMessage(e: unknown): string {
   if (typeof e === "string") return e;
   if (e instanceof Error) return e.message;
@@ -127,10 +135,7 @@ function App() {
       <main className="bg-wp-body grid flex-1 place-items-center p-10">
         {status.kind === "searching" && (
           <div className="flex flex-col items-center gap-4">
-            <div
-              className="border-wp-track border-t-wp-accent h-8 w-8 rounded-full border-[3px]"
-              style={{ animation: "wp-spin 0.8s linear infinite" }}
-            />
+            <LoaderCircle className="text-wp-accent h-8 w-8 animate-spin" strokeWidth={2.5} />
             <p className="text-wp-sub text-[15px] font-medium">Looking for Minecraft...</p>
           </div>
         )}
@@ -138,25 +143,10 @@ function App() {
         {status.kind === "found" && (
           <div className="flex flex-col items-center gap-5">
             <div className="bg-wp-green grid h-10 w-10 place-items-center rounded-full">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <Check className="h-5 w-5 text-white" strokeWidth={3} />
             </div>
             <p className="text-wp-title text-[15px] font-medium">Found Minecraft!</p>
-            <button
-              onClick={() => handleSetup(status.dir, status.manifest)}
-              className="bg-wp-primary text-wp-primary-text hover:bg-wp-primary-hover cursor-pointer rounded-lg px-6 py-2.5 text-[14px] font-medium"
-            >
-              Set Up My Game
-            </button>
+            <Button onClick={() => handleSetup(status.dir, status.manifest)}>Set Up My Game</Button>
           </div>
         )}
 
@@ -184,18 +174,9 @@ function App() {
                   aria-expanded={showDetails}
                 >
                   <span>What's Being Installed?</span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 transition-transform"
-                    style={{ transform: showDetails ? "rotate(180deg)" : "rotate(0deg)" }}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-150 ${showDetails ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {showDetails && (
@@ -216,35 +197,26 @@ function App() {
               </p>
             )}
 
-            <button className="bg-wp-primary text-wp-primary-text hover:bg-wp-primary-hover w-full cursor-pointer rounded-lg py-3 text-[15px] font-medium">
+            <Button size="lg" className="w-full">
               Install
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="quiet"
+              size="sm"
               onClick={() => {
                 setShowDetails(false);
                 setStatus({ kind: "found", dir: status.dir, manifest: status.manifest });
               }}
-              className="text-wp-muted hover:text-wp-sub cursor-pointer border-0 bg-transparent text-[13px]"
             >
               Not Now
-            </button>
+            </Button>
           </div>
         )}
 
         {status.kind === "bedrock" && (
           <div className="flex max-w-sm flex-col items-center gap-4 text-center">
             <div className="bg-wp-green grid h-10 w-10 place-items-center rounded-full">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <Check className="h-5 w-5 text-white" strokeWidth={3} />
             </div>
             <p className="text-wp-title text-[15px] font-medium">
               Oh! Looks Like You're on Minecraft Bedrock Edition : )
@@ -261,39 +233,14 @@ function App() {
                   {status.manifest.server.address}
                 </span>
               </div>
-              <button
+              <Button
+                size="icon"
                 onClick={() => handleCopy(status.manifest.server.address)}
-                className="border-wp-ghost-border bg-wp-ghost-bg text-wp-ghost-text hover:border-wp-accent grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-md border"
                 title="Copy Server Address"
                 aria-label="Copy Server Address"
               >
-                {copied ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                )}
-              </button>
+                {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+              </Button>
             </div>
             <p className="text-wp-muted text-[13px]">
               Certain add-ons are only available on Java Edition - Bedrock players can still join
@@ -303,11 +250,24 @@ function App() {
         )}
 
         {status.kind === "failed" && (
-          <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex max-w-md flex-col items-center gap-4 text-center">
             <p className="text-wp-title text-[15px] font-medium">Something Went Wrong... : /</p>
             <p className="text-wp-danger text-[14px]">
               {status.message ?? "Something went wrong. Please try again."}
             </p>
+
+            {status.message && asksForContact(status.message) && (
+              <div className="flex justify-center gap-2.5">
+                <Button size="pill" onClick={() => client.openUrl(DISCORD_URL)}>
+                  <SiDiscord className="h-4 w-4 shrink-0" />
+                  Get Help
+                </Button>
+                <Button variant="ghost" size="pill" onClick={() => client.openLogFolder()}>
+                  <Folder className="h-4 w-4 shrink-0" />
+                  Open Logs
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </main>
