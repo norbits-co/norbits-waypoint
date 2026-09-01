@@ -44,6 +44,7 @@
   --wp-track: #2a2f36;
   --wp-mono-strong: #aab2bb;
   --wp-mono-faint: #6f7780;
+  --wp-danger: #ff6b6b;
 }
 
 /* Light theme */
@@ -73,6 +74,7 @@
   --wp-track: #e6e3ee;
   --wp-mono-strong: #4a4552;
   --wp-mono-faint: #8b8697;
+  --wp-danger: #c62828;
 }
 
 /* Static theme tokens */
@@ -110,6 +112,7 @@
   --color-wp-track: var(--wp-track);
   --color-wp-mono-strong: var(--wp-mono-strong);
   --color-wp-mono-faint: var(--wp-mono-faint);
+  --color-wp-danger: var(--wp-danger);
 }
 
 /* Animations */
