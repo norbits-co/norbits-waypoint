@@ -2312,6 +2312,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-log",
  "tauri-plugin-opener",
+ "thiserror 2.0.20",
 ]
 
 [[package]]

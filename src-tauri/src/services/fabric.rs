@@ -1,4 +1,11 @@
+//! The Fabric mod loader, via meta.fabricmc.net.
+//!
+//! We never run the Fabric installer jar - it needs a system Java, and most of our players don't have one. The vanilla launcher ships its own hidden JRE, so
+//! we write the profile JSON directly instead (#17).
+
 use serde::Deserialize;
+
+use crate::error::{Error, Result, Service};
 
 const FABRIC_META: &str = "https://meta.fabricmc.net/v2";
 
@@ -18,7 +25,7 @@ pub async fn resolve_loader_version(
     client: &reqwest::Client,
     mc_version: &str,
     pinned: Option<&str>,
-) -> Result<String, String> {
+) -> Result<String> {
     if let Some(v) = pinned {
         return Ok(v.to_string());
     }
@@ -29,27 +36,26 @@ pub async fn resolve_loader_version(
         .get(&url)
         .send()
         .await
-        .map_err(|e| {
-            log::error!("fabric meta unreachable for {mc_version}: {e}");
-            "Couldn't download what your game needs. Check your internet connection and try again."
-                .to_string()
+        .map_err(|source| Error::Unreachable {
+            service: Service::Fabric,
+            source,
         })?
         .error_for_status()
-        .map_err(|e| {
-            log::error!("fabric meta returned an error for {mc_version}: {e}");
-            format!("Minecraft {mc_version} isn't supported yet.")
+        .map_err(|_| Error::UnsupportedGameVersion {
+            mc_version: mc_version.to_string(),
         })?
         .json()
         .await
-        .map_err(|e| {
-            log::error!("could not parse fabric meta for {mc_version}: {e}");
-            "Something went wrong getting your game ready. Please try again, and let us know if it keeps happening."
-                .to_string()
+        .map_err(|source| Error::BadResponse {
+            service: Service::Fabric,
+            source,
         })?;
 
     entries
         .into_iter()
         .find(|e| e.loader.stable)
         .map(|e| e.loader.version)
-        .ok_or_else(|| format!("Minecraft {mc_version} isn't supported yet."))
+        .ok_or_else(|| Error::UnsupportedGameVersion {
+            mc_version: mc_version.to_string(),
+        })
 }
