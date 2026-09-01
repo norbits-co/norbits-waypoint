@@ -16,8 +16,11 @@
     "check": "pnpm typecheck && pnpm lint && pnpm format:check"
   },
   "dependencies": {
+    "@icons-pack/react-simple-icons": "^13.15.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/api": "^2.11.1",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^1.38.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"

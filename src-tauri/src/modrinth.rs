@@ -67,15 +67,22 @@ async fn fetch_version(
         ])
         .send()
         .await
-        .map_err(|_| {
-            "Couldn't reach the mod service. Check your internet connection and try again."
+        .map_err(|e| {
+            log::error!("modrinth unreachable while looking up {id_or_slug}: {e}");
+            "Couldn't download what your game needs. Check your internet connection and try again."
                 .to_string()
         })?
         .error_for_status()
-        .map_err(|_| format!("Couldn't find {display_name}. It may have been removed."))?
+        .map_err(|e| {
+            log::error!("modrinth returned an error for {id_or_slug}: {e}");
+            format!("Couldn't find {display_name}. It may have been removed.")
+        })?
         .json()
         .await
-        .map_err(|e| format!("Unexpected response while looking up {display_name}: {e}"))?;
+        .map_err(|e| {
+            log::error!("could not parse the modrinth response for {id_or_slug}: {e}");
+            format!("Something went wrong setting up {display_name}. Please try again, and let us know if it keeps happening.")
+        })?;
 
     // The API happens to return newest-first, but that isn't promised anywhere.
     versions.sort_by(|a, b| b.date_published.cmp(&a.date_published));
@@ -83,7 +90,7 @@ async fn fetch_version(
     versions
         .into_iter()
         .next()
-        .ok_or_else(|| format!("{display_name} isn't available for Minecraft {mc_version} yet."))
+        .ok_or_else(|| format!("{display_name} isn't ready for Minecraft {mc_version} yet."))
 }
 
 /// Every jar needed for this manifest, following required dependencies.
@@ -137,7 +144,7 @@ pub async fn resolve_mods(
             .iter()
             .find(|f| f.primary)
             .or_else(|| version.files.first())
-            .ok_or_else(|| format!("{display_name} has no file to download."))?;
+            .ok_or_else(|| format!("{display_name} isn't available to download right now."))?;
 
         planned.push(PlannedMod {
             project_id: version.project_id.clone(),

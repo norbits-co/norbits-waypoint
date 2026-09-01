@@ -57,6 +57,10 @@ export const api = {
   install: (plan: InstallPlan, mcDir: string) => invoke<void>("install", { plan, mcDir }),
 
   openModsFolder: (mcDir: string) => invoke<void>("open_mods_folder", { mcDir }),
+
+  openUrl: (url: string) => invoke<void>("open_url", { url }),
+
+  openLogFolder: () => invoke<void>("open_log_folder"),
 };
 
 // Mock backend - "pnpm dev:mock"
@@ -145,6 +149,13 @@ const mocks: typeof api = {
   },
 
   openModsFolder: async () => {},
+
+  openUrl: async (url) => {
+    // In a browser there's no system shell to hand it to, so just open a tab.
+    window.open(url, "_blank", "noopener");
+  },
+
+  openLogFolder: async () => {},
 };
 
 // Import this and not "api" - swaps to mock data
