@@ -140,3 +140,177 @@ impl Serialize for Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// reqwest gives you no way to build one of its errors by hand, so we make a real one. A malformed URL fails before any network work, so this is fast
+    /// and can't be flaky.
+    fn reqwest_error() -> reqwest::Error {
+        tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap()
+            .block_on(async { reqwest::get("not a url").await.unwrap_err() })
+    }
+
+    /// One of every variant. Adding a variant without adding it here is a compile error, which is the point.
+    fn every_variant() -> Vec<Error> {
+        vec![
+            Error::Unreachable {
+                service: Service::NorBits,
+                source: reqwest_error(),
+            },
+            Error::Unreachable {
+                service: Service::Modrinth,
+                source: reqwest_error(),
+            },
+            Error::Unreachable {
+                service: Service::Fabric,
+                source: reqwest_error(),
+            },
+            Error::BadResponse {
+                service: Service::Modrinth,
+                source: reqwest_error(),
+            },
+            Error::ManifestUnavailable {
+                source: reqwest_error(),
+            },
+            Error::UnsupportedGameVersion {
+                mc_version: "26.2".into(),
+            },
+            Error::ModNotFound {
+                name: "Voice Chat".into(),
+                source: reqwest_error(),
+            },
+            Error::ModNoBuild {
+                name: "Voice Chat".into(),
+                mc_version: "26.2".into(),
+            },
+            Error::ModNoFile {
+                name: "Voice Chat".into(),
+            },
+            Error::HttpClient(reqwest_error()),
+            Error::LogDirUnavailable(tauri::Error::AssetNotFound("x".into())),
+            Error::LogDirCreate(std::io::Error::other("x")),
+            Error::OpenFailed {
+                what: "the log folder".into(),
+                source: Box::new(tauri_plugin_opener::Error::UnknownProgramName("x".into())),
+            },
+        ]
+    }
+
+    #[test]
+    fn every_variant_says_something() {
+        for e in every_variant() {
+            let msg = e.player_message();
+            assert!(!msg.trim().is_empty(), "{e:?} has no message");
+            assert!(
+                msg.ends_with('.') || msg.ends_with('!'),
+                "{e:?} produced a message with no closing punctuation: {msg}"
+            );
+        }
+    }
+
+    #[test]
+    fn no_message_leaks_library_vocabulary() {
+        // A player seeing "invalid type: null, expected a string at line 1 column 4823" can do nothing with it.
+        const LEAKS: &[&str] = &[
+            "reqwest", "serde", "json", "dns", "http", "url", "utf-8", "os error", "errno",
+            "panicked", "unwrap",
+        ];
+
+        for e in every_variant() {
+            let msg = e.player_message().to_lowercase();
+            for leak in LEAKS {
+                assert!(!msg.contains(leak), "{e:?} leaks {leak:?}: {msg}");
+            }
+        }
+    }
+
+    #[test]
+    fn no_message_uses_jargon() {
+        // The audience couldn't install a mod by hand.
+        const JARGON: &[&str] = &[
+            "mod loader",
+            "mod service",
+            "downloader",
+            "jar",
+            "sha512",
+            "manifest",
+            "fabric",
+            "modrinth",
+        ];
+
+        for e in every_variant() {
+            let msg = e.player_message().to_lowercase();
+            for word in JARGON {
+                assert!(!msg.contains(word), "{e:?} uses jargon {word:?}: {msg}");
+            }
+        }
+    }
+
+    #[test]
+    fn our_fault_asks_the_player_to_tell_us() {
+        // "let us know" is what surfaces the Discord and Open Logs buttons on the failure screen.
+        let ours = [
+            Error::BadResponse {
+                service: Service::Modrinth,
+                source: reqwest_error(),
+            },
+            Error::ManifestUnavailable {
+                source: reqwest_error(),
+            },
+            Error::HttpClient(reqwest_error()),
+            Error::LogDirCreate(std::io::Error::other("x")),
+        ];
+
+        for e in ours {
+            assert!(
+                e.player_message().contains("let us know"),
+                "{e:?} should offer a way to reach us: {}",
+                e.player_message()
+            );
+        }
+    }
+
+    #[test]
+    fn their_side_does_not_ask_for_contact() {
+        // Offering a support link to someone whose wifi is off is noise.
+        let theirs = [
+            Error::Unreachable {
+                service: Service::NorBits,
+                source: reqwest_error(),
+            },
+            Error::Unreachable {
+                service: Service::Modrinth,
+                source: reqwest_error(),
+            },
+            Error::UnsupportedGameVersion {
+                mc_version: "26.2".into(),
+            },
+            Error::ModNoBuild {
+                name: "Voice Chat".into(),
+                mc_version: "26.2".into(),
+            },
+        ];
+
+        for e in theirs {
+            assert!(
+                !e.player_message().contains("let us know"),
+                "{e:?} shouldn't ask for contact: {}",
+                e.player_message()
+            );
+        }
+    }
+
+    #[test]
+    fn a_mod_is_named_by_the_name_a_player_would_recognise() {
+        let e = Error::ModNoBuild {
+            name: "Voice Chat".into(),
+            mc_version: "26.2".into(),
+        };
+
+        assert!(e.player_message().contains("Voice Chat"));
+    }
+}
