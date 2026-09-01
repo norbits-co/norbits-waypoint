@@ -7,7 +7,8 @@ use serde::Deserialize;
 
 use crate::error::{Error, Result, Service};
 
-const FABRIC_META: &str = "https://meta.fabricmc.net/v2";
+/// Production base. Passed in rather than read directly so tests can point this at a mock server.
+pub const META: &str = "https://meta.fabricmc.net/v2";
 
 #[derive(Debug, Deserialize)]
 struct LoaderEntry {
@@ -23,6 +24,7 @@ struct LoaderInfo {
 /// Newest stable loader for this Minecraft version, unless the manifest pins one.
 pub async fn resolve_loader_version(
     client: &reqwest::Client,
+    meta: &str,
     mc_version: &str,
     pinned: Option<&str>,
 ) -> Result<String> {
@@ -30,7 +32,7 @@ pub async fn resolve_loader_version(
         return Ok(v.to_string());
     }
 
-    let url = format!("{FABRIC_META}/versions/loader/{mc_version}");
+    let url = format!("{meta}/versions/loader/{mc_version}");
 
     let entries: Vec<LoaderEntry> = client
         .get(&url)

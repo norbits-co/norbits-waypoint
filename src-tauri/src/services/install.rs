@@ -14,12 +14,13 @@ pub async fn plan(manifest: &Manifest, mc_dir: &str) -> Result<InstallPlan> {
 
     let loader_version = fabric::resolve_loader_version(
         &client,
+        fabric::META,
         &manifest.mc_version,
         manifest.loader_version.as_deref(),
     )
     .await?;
 
-    let mods = modrinth::resolve_mods(&client, manifest).await?;
+    let mods = modrinth::resolve_mods(&client, modrinth::API, manifest).await?;
     let total_bytes = mods.iter().map(|m| m.size).sum();
 
     Ok(InstallPlan {

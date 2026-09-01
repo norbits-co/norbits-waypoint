@@ -1,7 +1,9 @@
 mod commands;
-mod error;
-mod services;
-mod types;
+
+// Public so tests/ can exercise them as a consumer would.
+pub mod error;
+pub mod services;
+pub mod types;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
