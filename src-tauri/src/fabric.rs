@@ -29,18 +29,27 @@ pub async fn resolve_loader_version(
         .get(&url)
         .send()
         .await
-        .map_err(|_| {
-            "Couldn't reach the mod loader service. Check your internet connection.".to_string()
+        .map_err(|e| {
+            log::error!("fabric meta unreachable for {mc_version}: {e}");
+            "Couldn't download what your game needs. Check your internet connection and try again."
+                .to_string()
         })?
         .error_for_status()
-        .map_err(|_| format!("Minecraft {mc_version} isn't supported by the mod loader yet."))?
+        .map_err(|e| {
+            log::error!("fabric meta returned an error for {mc_version}: {e}");
+            format!("Minecraft {mc_version} isn't supported yet.")
+        })?
         .json()
         .await
-        .map_err(|e| format!("Unexpected response from the mod loader service: {e}"))?;
+        .map_err(|e| {
+            log::error!("could not parse fabric meta for {mc_version}: {e}");
+            "Something went wrong getting your game ready. Please try again, and let us know if it keeps happening."
+                .to_string()
+        })?;
 
     entries
         .into_iter()
         .find(|e| e.loader.stable)
         .map(|e| e.loader.version)
-        .ok_or_else(|| format!("No stable mod loader for Minecraft {mc_version} yet."))
+        .ok_or_else(|| format!("Minecraft {mc_version} isn't supported yet."))
 }

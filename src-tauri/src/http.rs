@@ -12,5 +12,9 @@ pub fn client() -> Result<reqwest::Client, String> {
         .user_agent(UA)
         .timeout(Duration::from_secs(20))
         .build()
-        .map_err(|e| format!("Couldn't start the downloader: {e}"))
+        .map_err(|e| {
+            log::error!("failed to build the http client: {e}");
+            "Something went wrong starting up. Please try again, and let us know if it keeps happening."
+                .to_string()
+        })
 }

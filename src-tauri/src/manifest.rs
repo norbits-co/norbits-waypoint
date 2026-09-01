@@ -44,8 +44,16 @@ pub async fn load_manifest() -> Result<Manifest, String> {
             "Couldn't reach NorBits. Check your internet connection and try again.".to_string()
         })?
         .error_for_status()
-        .map_err(|e| format!("NorBits server list unavailable: {e}"))?
+        .map_err(|e| {
+            log::error!("manifest request returned an error: {e}");
+            "Couldn't reach NorBits. Please try again, and let us know if it keeps happening."
+                .to_string()
+        })?
         .json::<Manifest>()
         .await
-        .map_err(|e| format!("The server list looks corrupted: {e}"))
+        .map_err(|e| {
+            log::error!("could not parse the manifest: {e}");
+            "Something went wrong getting your game ready. Please try again, and let us know if it keeps happening."
+                .to_string()
+        })
 }

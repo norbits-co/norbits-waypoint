@@ -43,22 +43,27 @@ function App() {
 
       try {
         dir = await client.findMinecraftDir();
-      } catch {
-        if (!cancelled) setStatus({ kind: "failed", reason: "minecraft" });
+      } catch (e) {
+        if (!cancelled)
+          setStatus({ kind: "failed", reason: "minecraft", message: errorMessage(e) });
         return;
       }
 
       try {
         manifest = await client.loadManifest();
-      } catch {
-        if (!cancelled) setStatus({ kind: "failed", reason: "manifest" });
+      } catch (e) {
+        if (!cancelled) setStatus({ kind: "failed", reason: "manifest", message: errorMessage(e) });
         return;
       }
 
       if (cancelled) return;
 
       if (!dir) {
-        setStatus({ kind: "failed", reason: "minecraft" });
+        setStatus({
+          kind: "failed",
+          reason: "minecraft",
+          message: "We couldn't check for Minecraft on this computer. Try restarting the app.",
+        });
       } else if (!dir.exists) {
         setStatus({ kind: "bedrock", manifest });
       } else {
@@ -301,11 +306,7 @@ function App() {
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-wp-title text-[15px] font-medium">Something Went Wrong... : /</p>
             <p className="text-wp-danger text-[14px]">
-              {status.reason === "plan" && status.message
-                ? status.message
-                : status.reason === "manifest"
-                  ? "Couldn't reach NorBits. Check your internet connection and try again."
-                  : "We couldn't check for Minecraft on this computer. Try restarting the app."}
+              {status.message ?? "Something went wrong. Please try again."}
             </p>
           </div>
         )}
