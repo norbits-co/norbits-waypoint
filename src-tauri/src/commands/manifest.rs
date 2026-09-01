@@ -4,5 +4,5 @@ use crate::types::Manifest;
 
 #[tauri::command]
 pub async fn load_manifest() -> Result<Manifest> {
-    services::manifest::fetch().await
+    services::manifest::fetch(services::manifest::MANIFEST_URL).await
 }

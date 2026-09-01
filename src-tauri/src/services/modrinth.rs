@@ -9,7 +9,8 @@ use serde::Deserialize;
 use crate::error::{Error, Result, Service};
 use crate::types::{Manifest, PlannedMod};
 
-const API: &str = "https://api.modrinth.com/v2";
+/// Production base.
+pub const API: &str = "https://api.modrinth.com/v2";
 
 // Modrinth's own shapes. serde ignores fields we don't declare.
 // No rename_all here - their JSON is snake_case already.
@@ -56,12 +57,13 @@ struct Pending {
 
 async fn fetch_version(
     client: &reqwest::Client,
+    api: &str,
     id_or_slug: &str,
     display_name: &str,
     mc_version: &str,
     loader: &str,
 ) -> Result<ApiVersion> {
-    let url = format!("{API}/project/{id_or_slug}/version");
+    let url = format!("{api}/project/{id_or_slug}/version");
 
     let mut versions: Vec<ApiVersion> = client
         .get(&url)
@@ -134,6 +136,7 @@ fn required_dependencies(
 /// Every jar needed for this manifest, following required dependencies.
 pub async fn resolve_mods(
     client: &reqwest::Client,
+    api: &str,
     manifest: &Manifest,
 ) -> Result<Vec<PlannedMod>> {
     let mut queue = initial_queue(manifest);
@@ -147,6 +150,7 @@ pub async fn resolve_mods(
 
         let version = fetch_version(
             client,
+            api,
             &pending.id,
             &pending.display_name,
             &manifest.mc_version,

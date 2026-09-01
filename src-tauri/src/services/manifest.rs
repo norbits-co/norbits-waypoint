@@ -5,14 +5,14 @@ use crate::services::http;
 use crate::types::Manifest;
 
 /// Interim home, until it moves to gaming.norbits.co/manifest.json.
-const MANIFEST_URL: &str =
+pub const MANIFEST_URL: &str =
     "https://raw.githubusercontent.com/norbits-co/norbits-waypoint/main/manifest.json";
 
-pub async fn fetch() -> Result<Manifest> {
+pub async fn fetch(url: &str) -> Result<Manifest> {
     let client = http::client()?;
 
     client
-        .get(MANIFEST_URL)
+        .get(url)
         .send()
         .await
         .map_err(|source| Error::Unreachable {
