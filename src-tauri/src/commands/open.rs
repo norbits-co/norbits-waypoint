@@ -12,7 +12,7 @@ pub fn open_url(app: AppHandle, url: String) -> Result<()> {
         .open_url(&url, None::<&str>)
         .map_err(|source| Error::OpenFailed {
             what: url.clone(),
-            source,
+            source: Box::new(source),
         })
 }
 
@@ -28,6 +28,6 @@ pub fn open_log_folder(app: AppHandle) -> Result<()> {
         .open_path(dir.to_string_lossy(), None::<&str>)
         .map_err(|source| Error::OpenFailed {
             what: "the log folder".into(),
-            source,
+            source: Box::new(source),
         })
 }

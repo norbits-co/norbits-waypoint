@@ -66,11 +66,12 @@ pub enum Error {
     #[error("could not create the log directory")]
     LogDirCreate(#[source] std::io::Error),
 
+    /// Boxed because the opener's error is large on Linux
     #[error("could not open {what}")]
     OpenFailed {
         what: String,
         #[source]
-        source: tauri_plugin_opener::Error,
+        source: Box<tauri_plugin_opener::Error>,
     },
 }
 
