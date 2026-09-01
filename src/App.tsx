@@ -212,9 +212,10 @@ function App() {
               Install
             </button>
             <button
-              onClick={() =>
-                setStatus({ kind: "found", dir: status.dir, manifest: status.manifest })
-              }
+              onClick={() => {
+                setShowDetails(false);
+                setStatus({ kind: "found", dir: status.dir, manifest: status.manifest });
+              }}
               className="text-wp-muted hover:text-wp-sub cursor-pointer border-0 bg-transparent text-[13px]"
             >
               Not now
