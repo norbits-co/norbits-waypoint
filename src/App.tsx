@@ -13,9 +13,12 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1_000_000).toFixed(1)} MB`;
 }
 
-function formatModNames(names: string[]): string {
-  if (names.length <= 2) return names.join(" & ");
-  return `${names[0]} & ${names[1]} and ${names.length - 2} more`;
+// Tauri rejects with the plain string from Err(String); the mocks throw an
+// Error object. Normalise both so no "Error:" prefix reaches a player.
+function errorMessage(e: unknown): string {
+  if (typeof e === "string") return e;
+  if (e instanceof Error) return e.message;
+  return "Something went wrong. Please try again.";
 }
 
 function App() {
@@ -74,7 +77,7 @@ function App() {
       const plan = await client.planInstall(manifest, dir.path);
       setStatus({ kind: "confirm", dir, manifest, plan });
     } catch (e) {
-      setStatus({ kind: "failed", reason: "plan", message: String(e) });
+      setStatus({ kind: "failed", reason: "plan", message: errorMessage(e) });
     }
   }
 
@@ -103,7 +106,7 @@ function App() {
         </div>
         <button
           onClick={() => setThemeName((p) => (p === "dark" ? "light" : "dark"))}
-          title={themeName === "dark" ? "Switch to light" : "Switch to dark"}
+          title={themeName === "dark" ? "Switch to Light" : "Switch to Dark"}
           className="text-wp-glyph grid h-[38px] w-[42px] cursor-pointer place-items-center border-0 bg-transparent hover:bg-[rgba(127,127,127,.16)]"
         >
           <span
@@ -123,7 +126,7 @@ function App() {
               className="border-wp-track border-t-wp-accent h-8 w-8 rounded-full border-[3px]"
               style={{ animation: "wp-spin 0.8s linear infinite" }}
             />
-            <p className="text-wp-sub text-[15px] font-medium">Looking for Minecraft…</p>
+            <p className="text-wp-sub text-[15px] font-medium">Looking for Minecraft...</p>
           </div>
         )}
 
@@ -147,7 +150,7 @@ function App() {
               onClick={() => handleSetup(status.dir, status.manifest)}
               className="bg-wp-primary text-wp-primary-text hover:bg-wp-primary-hover cursor-pointer rounded-lg px-6 py-2.5 text-[14px] font-medium"
             >
-              Set up my game
+              Set Up My Game
             </button>
           </div>
         )}
@@ -155,7 +158,7 @@ function App() {
         {status.kind === "confirm" && (
           <div className="flex w-full max-w-md flex-col items-center gap-6">
             <p className="text-wp-title text-center text-[17px] font-medium">
-              Adding {formatModNames(status.manifest.mods.map((m) => m.name))} to your game!
+              Ready to Set Up Your Game
             </p>
 
             <div className="border-wp-panel-border bg-wp-panel w-full rounded-lg border">
@@ -175,7 +178,7 @@ function App() {
                   className="text-wp-muted hover:text-wp-sub flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-[13px]"
                   aria-expanded={showDetails}
                 >
-                  <span>What's being installed?</span>
+                  <span>What's Being Installed?</span>
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -218,7 +221,7 @@ function App() {
               }}
               className="text-wp-muted hover:text-wp-sub cursor-pointer border-0 bg-transparent text-[13px]"
             >
-              Not now
+              Not Now
             </button>
           </div>
         )}
@@ -239,7 +242,7 @@ function App() {
               </svg>
             </div>
             <p className="text-wp-title text-[15px] font-medium">
-              Oh!, Look Like You're On Minecraft Bedrock Edition : )
+              Oh! Looks Like You're on Minecraft Bedrock Edition : )
             </p>
             <p className="text-wp-sub text-[14px]">
               You're all set! - just open Minecraft and connect to the server:
@@ -297,7 +300,7 @@ function App() {
         {status.kind === "failed" && (
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-wp-title text-[15px] font-medium">Something Went Wrong... : /</p>
-            <p className="text-wp-sub text-[14px]">
+            <p className="text-wp-danger text-[14px]">
               {status.reason === "plan" && status.message
                 ? status.message
                 : status.reason === "manifest"

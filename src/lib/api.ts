@@ -35,11 +35,12 @@ export type InstallPlan = {
   staleFiles: string[];
 };
 
+// Listed in the order the backend emits them, which is also the order a player reads them in.
 export type InstallProgress =
   | { stage: "resolving" }
+  | { stage: "installingLoader" }
   | { stage: "downloading"; filename: string; received: number; total: number }
   | { stage: "verifying"; filename: string }
-  | { stage: "installingLoader" }
   | { stage: "addingServer" }
   | { stage: "done" }
   | { stage: "error"; message: string };
@@ -119,6 +120,10 @@ const mocks: typeof api = {
     emit({ stage: "resolving" });
     await sleep(600);
 
+    // Loader first, then mods: the order a player reads it in.
+    emit({ stage: "installingLoader" });
+    await sleep(700);
+
     for (const m of plan.mods) {
       const step = Math.ceil(m.size / 8);
       for (let received = 0; received < m.size + step; received += step) {
@@ -134,8 +139,6 @@ const mocks: typeof api = {
       await sleep(200);
     }
 
-    emit({ stage: "installingLoader" });
-    await sleep(700);
     emit({ stage: "addingServer" });
     await sleep(400);
     emit({ stage: "done" });
