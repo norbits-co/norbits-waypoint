@@ -1,17 +1,18 @@
 [package]
-name = "app"
+name = "norbits-waypoint"
 version = "0.2.6"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+description = "Installs the mods needed to play on the NorBits' game servers"
+authors = ["NorBits"]
+license-file = "../LICENSE"
+repository = "https://github.com/norbits-co/norbits-waypoint"
 edition = "2021"
 rust-version = "1.94"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "app_lib"
+name = "norbits_waypoint_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -26,3 +27,4 @@ tauri-plugin-log = "2"
 dirs = "6.0.0"
 reqwest = { version = "0.13.3", default-features = false, features = ["json", "rustls", "http2", "query"] }
 tauri-plugin-opener = "2.5.5"
+thiserror = "2.0.20"

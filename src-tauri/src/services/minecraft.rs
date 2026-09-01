@@ -1,16 +1,17 @@
+//! Finding the player's Minecraft installation.
+
 use std::path::PathBuf;
 
-use serde::Serialize;
+use crate::types::MinecraftDir;
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MinecraftDir {
-    pub path: String,
-    pub exists: bool,
-}
+// One definition per platform; exactly one survives compilation.
+//   Windows  %APPDATA%\.minecraft
+//   macOS    ~/Library/Application Support/minecraft
+//   Linux    ~/.minecraft
 
 #[cfg(target_os = "windows")]
 fn default_dir() -> Option<PathBuf> {
+    // config_dir() is Roaming AppData on Windows, which is what we want.
     dirs::config_dir().map(|p| p.join(".minecraft"))
 }
 
@@ -24,8 +25,10 @@ fn default_dir() -> Option<PathBuf> {
     dirs::home_dir().map(|p| p.join(".minecraft"))
 }
 
-#[tauri::command]
-pub fn find_minecraft_dir() -> Option<MinecraftDir> {
+/// The default `.minecraft` location, and whether anything is there.
+///
+/// Returns `None` only when we can't resolve a home directory at all.
+pub fn find() -> Option<MinecraftDir> {
     let path = default_dir()?;
 
     Some(MinecraftDir {
