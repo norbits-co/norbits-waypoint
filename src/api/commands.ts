@@ -18,4 +18,6 @@ export const commands: Api = {
   openUrl: (url: string) => invoke<void>("open_url", { url }),
 
   openLogFolder: () => invoke<void>("open_log_folder"),
+
+  logError: (message: string) => invoke<void>("log_error", { message }),
 };

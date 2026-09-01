@@ -94,4 +94,8 @@ export const mocks: Api = {
   },
 
   openLogFolder: async () => {},
+
+  logError: async (message) => {
+    console.error("[waypoint]", message);
+  },
 };

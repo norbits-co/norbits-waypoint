@@ -6,6 +6,7 @@
 //! Mirrors `src/api/commands.ts` on the frontend.
 
 pub mod install;
+pub mod log;
 pub mod manifest;
 pub mod minecraft;
 pub mod open;

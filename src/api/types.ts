@@ -52,4 +52,6 @@ export type Api = {
   openModsFolder: (mcDir: string) => Promise<void>;
   openUrl: (url: string) => Promise<void>;
   openLogFolder: () => Promise<void>;
+  /** Write a frontend failure into the same log file the backend uses. */
+  logError: (message: string) => Promise<void>;
 };
