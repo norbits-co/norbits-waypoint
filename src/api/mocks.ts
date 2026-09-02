@@ -38,6 +38,7 @@ const PLAN: InstallPlan = {
     {
       projectId: "9eGKb6K1",
       version: "fabric-2.6.22+26.1.2",
+      name: "Voice Chat",
       filename: "voicechat-fabric-2.6.22+26.1.2.jar",
       url: "https://example.invalid/voicechat.jar",
       size: 1_200_000,
@@ -47,6 +48,7 @@ const PLAN: InstallPlan = {
     {
       projectId: "P7dR8mSH",
       version: "0.155.2+26.1.2",
+      name: "Supporting Files",
       filename: "fabric-api-0.155.2+26.1.2.jar",
       url: "https://example.invalid/fabric-api.jar",
       size: 1_900_000,
@@ -63,10 +65,14 @@ const MESSAGES = {
   offline: "Couldn't reach NorBits. Check your internet connection and try again.",
 };
 
+/** Stand-ins for a manifest with more than one mod listed. */
+const EXTRA_NAMES = ["Minimap", "Better Backpacks", "Shaders"];
+
 function extraMods(count: number) {
   return Array.from({ length: count }, (_, i) => ({
     ...PLAN.mods[0],
     projectId: `extra-${i}`,
+    name: EXTRA_NAMES[i % EXTRA_NAMES.length],
     filename: `another-mod-${i}.jar`,
   }));
 }

@@ -42,8 +42,12 @@ export function ConfirmScreen({ plan, onInstall, onCancel }: Props) {
           {showDetails && (
             <ul className="mt-3 flex flex-col gap-2">
               {plan.mods.map((mod) => (
-                <li key={mod.filename} className="text-wp-mono-faint font-mono text-[12px]">
-                  {mod.filename}
+                <li
+                  key={mod.filename}
+                  className="text-wp-muted flex items-center justify-between text-[12.5px]"
+                >
+                  <span>{mod.name}</span>
+                  <span className="text-wp-faint">{formatBytes(mod.size)}</span>
                 </li>
               ))}
             </ul>
