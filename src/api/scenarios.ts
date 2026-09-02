@@ -20,6 +20,10 @@ export const SCENARIOS = {
   ourFailure: "Failed (asks for contact)",
   // Their connection, so no contact buttons.
   offline: "Failed (offline)",
+  // The install is running, so the progress screen is visible.
+  installing: "Installing",
+  // The install fails partway through, so the error path fires.
+  installFailure: "Installing (fails partway)",
 } as const;
 
 export type Scenario = keyof typeof SCENARIOS;

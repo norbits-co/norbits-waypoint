@@ -8,8 +8,10 @@ export type Status =
   | { kind: "searching" }
   | { kind: "found"; dir: MinecraftDir; manifest: Manifest }
   | { kind: "confirm"; dir: MinecraftDir; manifest: Manifest; plan: InstallPlan }
+  | { kind: "installing"; dir: MinecraftDir; manifest: Manifest; plan: InstallPlan }
+  | { kind: "done" }
   | { kind: "bedrock"; manifest: Manifest }
-  | { kind: "failed"; reason: "minecraft" | "manifest" | "plan"; message: string };
+  | { kind: "failed"; reason: "minecraft" | "manifest" | "plan" | "install"; message: string };
 
 // Finds Minecraft and loads the manifest on mount, then exposes the transitions the screens can trigger.
 export function useStartup() {
@@ -74,5 +76,17 @@ export function useStartup() {
     }
   }
 
-  return { status, plan };
+  function install(dir: MinecraftDir, manifest: Manifest, installPlan: InstallPlan) {
+    setStatus({ kind: "installing", dir, manifest, plan: installPlan });
+  }
+
+  function done() {
+    setStatus({ kind: "done" });
+  }
+
+  function fail(message: string) {
+    setStatus({ kind: "failed", reason: "install", message });
+  }
+
+  return { status, plan, install, done, fail };
 }
