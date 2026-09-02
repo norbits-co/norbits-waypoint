@@ -8,15 +8,17 @@ import { useStartup } from "./hooks/useStartup";
 import { useTheme } from "./hooks/useTheme";
 import { BedrockScreen } from "./screens/BedrockScreen";
 import { ConfirmScreen } from "./screens/ConfirmScreen";
+import { DoneScreen } from "./screens/DoneScreen";
 import { FailedScreen } from "./screens/FailedScreen";
 import { FoundScreen } from "./screens/FoundScreen";
+import { InstallingScreen } from "./screens/InstallingScreen";
 import { SearchingScreen } from "./screens/SearchingScreen";
 
 const IS_MOCK = import.meta.env.VITE_MOCK === "1";
 
 // The state machine, and which screen it means. Screens take plain props.
 function Flow() {
-  const { status, plan } = useStartup();
+  const { status, plan, install, done, fail } = useStartup();
 
   return (
     <main className="bg-wp-body grid flex-1 place-items-center p-10">
@@ -27,10 +29,16 @@ function Flow() {
       {status.kind === "confirm" && (
         <ConfirmScreen
           plan={status.plan}
-          onInstall={() => {}}
+          onInstall={() => install(status.dir, status.manifest, status.plan)}
           onCancel={() => client.closeWindow()}
         />
       )}
+
+      {status.kind === "installing" && (
+        <InstallingScreen plan={status.plan} mcDir={status.dir.path} onDone={done} onError={fail} />
+      )}
+
+      {status.kind === "done" && <DoneScreen />}
 
       {status.kind === "bedrock" && <BedrockScreen address={status.manifest.server.address} />}
 

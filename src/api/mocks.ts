@@ -146,6 +146,15 @@ export const mocks: Api = {
       await sleep(200);
     }
 
+    if (currentScenario() === "installFailure") {
+      emit({
+        stage: "error",
+        message:
+          "Something went wrong getting your game ready. Please try again, and let us know if it keeps happening.",
+      });
+      return;
+    }
+
     emit({ stage: "addingServer" });
     await sleep(400);
     emit({ stage: "done" });
