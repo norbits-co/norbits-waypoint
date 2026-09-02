@@ -77,6 +77,15 @@ function extraMods(count: number) {
   }));
 }
 
+/** A plan whose total actually matches the files in it. */
+function withMods(mods: InstallPlan["mods"]): InstallPlan {
+  return {
+    ...PLAN,
+    mods,
+    totalBytes: mods.reduce((sum, m) => sum + m.size, 0),
+  };
+}
+
 // Each command reads the scenario when it's called, not when the module loads, so the picker can switch without a reload.
 export const mocks: Api = {
   findMinecraftDir: async () => {
@@ -97,14 +106,18 @@ export const mocks: Api = {
   planInstall: async () => {
     const scenario = currentScenario();
     if (scenario === "freshInstall") return { ...PLAN, staleFiles: [] };
-    if (scenario === "manyMods") {
-      const mods = [...PLAN.mods, ...extraMods(2)];
-      return {
-        ...PLAN,
-        mods,
-        totalBytes: mods.reduce((sum, m) => sum + m.size, 0),
-      };
+    if (scenario === "manyMods") return withMods([...PLAN.mods, ...extraMods(2)]);
+
+    if (scenario === "manyDependencies") {
+      // Two mods, each pulling in a dependency.
+      return withMods([
+        PLAN.mods[0],
+        ...extraMods(1),
+        PLAN.mods[1],
+        { ...PLAN.mods[1], projectId: "dep-2", filename: "another-dep.jar", size: 400_000 },
+      ]);
     }
+
     return PLAN;
   },
 

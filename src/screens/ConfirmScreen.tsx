@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { InstallPlan } from "../api";
 import { Button } from "../components/Button";
 import { formatBytes } from "../utils/format";
+import { groupPlanRows } from "../utils/plan";
 
 type Props = {
   plan: InstallPlan;
@@ -41,13 +42,16 @@ export function ConfirmScreen({ plan, onInstall, onCancel }: Props) {
 
           {showDetails && (
             <ul className="mt-3 flex flex-col gap-2">
-              {plan.mods.map((mod) => (
+              {groupPlanRows(plan.mods).map((row) => (
                 <li
-                  key={mod.filename}
+                  key={row.name}
                   className="text-wp-muted flex items-center justify-between text-[12.5px]"
                 >
-                  <span>{mod.name}</span>
-                  <span className="text-wp-faint">{formatBytes(mod.size)}</span>
+                  <span>
+                    {row.name}
+                    {row.count > 1 && <span className="text-wp-faint"> ({row.count})</span>}
+                  </span>
+                  <span className="text-wp-faint">{formatBytes(row.bytes)}</span>
                 </li>
               ))}
             </ul>

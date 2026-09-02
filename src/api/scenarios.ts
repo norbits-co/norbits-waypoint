@@ -12,6 +12,8 @@ export const SCENARIOS = {
   freshInstall: "Confirm (nothing stale)",
   // Four mods, to check the confirm step's counts and list.
   manyMods: "Confirm (four mods)",
+  // Two mods each pulling in a dependency, so the supporting files group.
+  manyDependencies: "Confirm (grouped supporting files)",
   // Detection itself failed - no Discord buttons, they can't help us.
   minecraftFailure: "Failed (no Minecraft)",
   // Our fault, so the failed screen offers Discord and Open Logs.

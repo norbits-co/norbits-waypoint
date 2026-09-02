@@ -76,6 +76,39 @@ describe("the details drawer", () => {
     expect(screen.getByText("Supporting Files")).toBeInTheDocument();
   });
 
+  it("shows one row per name, not per file", async () => {
+    // Two mods each needing a dependency.
+    render(
+      <ConfirmScreen
+        plan={plan({
+          mods: [
+            mod("voicechat.jar", 1_200_000, "Voice Chat"),
+            mod("fabric-api.jar", 1_900_000, "Supporting Files"),
+            mod("laser.jar", 500_000, "Laser Mod"),
+            mod("another-dep.jar", 400_000, "Supporting Files"),
+          ],
+        })}
+        onInstall={noop}
+        onCancel={noop}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: /what's being installed/i }));
+
+    expect(screen.getAllByText("Supporting Files")).toHaveLength(1);
+    // Combined, so the breakdown adds up to the total in the header.
+    expect(screen.getByText("2.3 MB")).toBeInTheDocument();
+    expect(screen.getByText("(2)")).toBeInTheDocument();
+  });
+
+  it("doesn't count a single file", async () => {
+    render(<ConfirmScreen plan={plan()} onInstall={noop} onCancel={noop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: /what's being installed/i }));
+
+    expect(screen.queryByText("(1)")).not.toBeInTheDocument();
+  });
+
   it("is a button, so it can be reached by keyboard", async () => {
     // It was a div with an onClick once. Querying by role keeps it from becoming one again.
     render(<ConfirmScreen plan={plan()} onInstall={noop} onCancel={noop} />);
