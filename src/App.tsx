@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { client } from "./api";
 import type { Scenario } from "./api/scenarios";
 import { ScenarioPicker } from "./components/ScenarioPicker";
 import { TitleBar } from "./components/TitleBar";
@@ -15,7 +16,7 @@ const IS_MOCK = import.meta.env.VITE_MOCK === "1";
 
 // The state machine, and which screen it means. Screens take plain props.
 function Flow() {
-  const { status, plan, cancelPlan } = useStartup();
+  const { status, plan } = useStartup();
 
   return (
     <main className="bg-wp-body grid flex-1 place-items-center p-10">
@@ -27,7 +28,7 @@ function Flow() {
         <ConfirmScreen
           plan={status.plan}
           onInstall={() => {}}
-          onCancel={() => cancelPlan(status.dir, status.manifest)}
+          onCancel={() => client.closeWindow()}
         />
       )}
 

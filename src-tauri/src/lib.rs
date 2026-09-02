@@ -34,7 +34,8 @@ pub fn run() {
             commands::install::plan_install,
             commands::open::open_url,
             commands::open::open_log_folder,
-            commands::log::log_error
+            commands::log::log_error,
+            commands::window::close_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

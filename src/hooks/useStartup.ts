@@ -74,9 +74,5 @@ export function useStartup() {
     }
   }
 
-  function cancelPlan(dir: MinecraftDir, manifest: Manifest) {
-    setStatus({ kind: "found", dir, manifest });
-  }
-
-  return { status, plan, cancelPlan };
+  return { status, plan };
 }
