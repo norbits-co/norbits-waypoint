@@ -12,6 +12,9 @@ use crate::types::{Manifest, PlannedMod};
 /// Production base.
 pub const API: &str = "https://api.modrinth.com/v2";
 
+/// What a dependency is called in the confirmation list.
+const DEPENDENCY_LABEL: &str = "Supporting Files";
+
 // Modrinth's own shapes. serde ignores fields we don't declare.
 // No rename_all here - their JSON is snake_case already.
 
@@ -51,8 +54,9 @@ struct Pending {
     id: String,
     /// False when pulled in as a dependency.
     requested: bool,
-    /// Player-facing name. Dependencies borrow it from whatever pulled them in.
+    /// Used in error messages.
     display_name: String,
+    list_name: String,
 }
 
 async fn fetch_version(
@@ -107,6 +111,7 @@ fn initial_queue(manifest: &Manifest) -> VecDeque<Pending> {
             id: m.slug.clone(),
             requested: true,
             display_name: m.name.clone(),
+            list_name: m.name.clone(),
         })
         .collect()
 }
@@ -129,6 +134,7 @@ fn required_dependencies(
             id: pid.clone(),
             requested: false,
             display_name: parent_name.to_string(),
+            list_name: DEPENDENCY_LABEL.to_string(),
         })
         .collect()
 }
@@ -182,6 +188,7 @@ pub async fn resolve_mods(
         planned.push(PlannedMod {
             project_id: version.project_id.clone(),
             version: version.version_number.clone(),
+            name: pending.list_name.clone(),
             filename: file.filename.clone(),
             url: file.url.clone(),
             size: file.size,

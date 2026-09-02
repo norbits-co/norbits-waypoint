@@ -46,6 +46,8 @@ pub struct ModEntry {
 pub struct PlannedMod {
     pub project_id: String,
     pub version: String,
+    /// Shown to players. Comes from the manifest for anything we asked for
+    pub name: String,
     pub filename: String,
     pub url: String,
     pub size: u64,

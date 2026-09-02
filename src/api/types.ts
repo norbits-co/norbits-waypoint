@@ -17,6 +17,8 @@ export type MinecraftDir = {
 export type PlannedMod = {
   projectId: string;
   version: string;
+  // Shown to players. From the manifest for anything we asked for, and a generic label for dependencies
+  name: string;
   filename: string;
   url: string;
   size: number;

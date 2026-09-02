@@ -5,10 +5,11 @@ import { describe, expect, it, vi } from "vitest";
 import type { InstallPlan, PlannedMod } from "../api";
 import { ConfirmScreen } from "./ConfirmScreen";
 
-function mod(filename: string, size = 1_000_000): PlannedMod {
+function mod(filename: string, size = 1_000_000, name = "Voice Chat"): PlannedMod {
   return {
     projectId: "x",
     version: "1.0.0",
+    name,
     filename,
     url: "https://example.invalid/a.jar",
     size,
@@ -19,7 +20,10 @@ function mod(filename: string, size = 1_000_000): PlannedMod {
 
 function plan(over: Partial<InstallPlan> = {}): InstallPlan {
   return {
-    mods: [mod("voicechat.jar", 1_200_000), mod("fabric-api.jar", 1_900_000)],
+    mods: [
+      mod("voicechat.jar", 1_200_000, "Voice Chat"),
+      mod("fabric-api.jar", 1_900_000, "Supporting Files"),
+    ],
     loaderVersion: "0.19.3",
     totalBytes: 3_100_000,
     staleFiles: [],
@@ -55,7 +59,7 @@ describe("the details drawer", () => {
   it("is closed to begin with", () => {
     render(<ConfirmScreen plan={plan()} onInstall={noop} onCancel={noop} />);
 
-    expect(screen.queryByText("voicechat.jar")).not.toBeInTheDocument();
+    expect(screen.queryByText("Voice Chat")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /what's being installed/i })).toHaveAttribute(
       "aria-expanded",
       "false"
@@ -67,8 +71,9 @@ describe("the details drawer", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /what's being installed/i }));
 
-    expect(screen.getByText("voicechat.jar")).toBeInTheDocument();
-    expect(screen.getByText("fabric-api.jar")).toBeInTheDocument();
+    expect(screen.getByText("Voice Chat")).toBeInTheDocument();
+    // Dependencies get a generic label - naming them would mean explaining them.
+    expect(screen.getByText("Supporting Files")).toBeInTheDocument();
   });
 
   it("is a button, so it can be reached by keyboard", async () => {
@@ -79,7 +84,7 @@ describe("the details drawer", () => {
     toggle.focus();
     await userEvent.keyboard("{Enter}");
 
-    expect(screen.getByText("voicechat.jar")).toBeInTheDocument();
+    expect(screen.getByText("Voice Chat")).toBeInTheDocument();
   });
 });
 
@@ -122,12 +127,12 @@ describe("the two choices", () => {
     expect(onCancel).toHaveBeenCalledOnce();
   });
 
-  it("shows no hashes, URLs or project IDs, even expanded", async () => {
-    // Distinctive fixture values, so a match means the field was rendered rather than a short string appearing by chance.
+  it("shows no filenames, hashes, URLs or project IDs, even expanded", async () => {
+    // The expanded view is for a nervous player, or the friend they asked to check it's safe.
     const distinctive = plan({
       mods: [
         {
-          ...mod("voicechat.jar"),
+          ...mod("FILENAMEFIXTURE.jar", 1_000_000, "Voice Chat"),
           sha512: "SHA512FIXTURE",
           url: "https://cdn.example.invalid/FIXTURE.jar",
           projectId: "PROJECTIDFIXTURE",
@@ -142,9 +147,11 @@ describe("the two choices", () => {
     await userEvent.click(screen.getByRole("button", { name: /what's being installed/i }));
 
     const text = container.textContent ?? "";
+    expect(text).not.toContain("FILENAMEFIXTURE");
     expect(text).not.toContain("SHA512FIXTURE");
     expect(text).not.toContain("PROJECTIDFIXTURE");
     expect(text).not.toContain("https://");
-    expect(text).toContain("voicechat.jar");
+    // The friendly name is what it should show instead.
+    expect(text).toContain("Voice Chat");
   });
 });
