@@ -163,4 +163,9 @@ export const mocks: Api = {
   logError: async (message) => {
     console.error("[waypoint]", message);
   },
+
+  closeWindow: async () => {
+    // A browser tab can't close itself unless script opened it.
+    console.info("[waypoint] closeWindow - would close the app");
+  },
 };

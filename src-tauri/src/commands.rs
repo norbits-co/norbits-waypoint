@@ -10,3 +10,4 @@ pub mod log;
 pub mod manifest;
 pub mod minecraft;
 pub mod open;
+pub mod window;

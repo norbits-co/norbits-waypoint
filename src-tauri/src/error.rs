@@ -60,6 +60,12 @@ pub enum Error {
     #[error("could not build the http client")]
     HttpClient(#[source] reqwest::Error),
 
+    #[error("the main window is gone")]
+    WindowMissing,
+
+    #[error("could not close the window")]
+    WindowClose(#[source] tauri::Error),
+
     #[error("could not resolve the log directory")]
     LogDirUnavailable(#[source] tauri::Error),
 
@@ -95,6 +101,10 @@ impl Error {
             Error::ManifestUnavailable { .. } => {
                 "Couldn't reach NorBits. Please try again, and let us know if it keeps happening."
                     .into()
+            }
+
+            Error::WindowMissing | Error::WindowClose(_) => {
+                "Couldn't close the app. Use the window's close button instead.".into()
             }
 
             Error::BadResponse { .. }
@@ -191,6 +201,8 @@ mod tests {
                 name: "Voice Chat".into(),
             },
             Error::HttpClient(reqwest_error()),
+            Error::WindowMissing,
+            Error::WindowClose(tauri::Error::AssetNotFound("x".into())),
             Error::LogDirUnavailable(tauri::Error::AssetNotFound("x".into())),
             Error::LogDirCreate(std::io::Error::other("x")),
             Error::OpenFailed {

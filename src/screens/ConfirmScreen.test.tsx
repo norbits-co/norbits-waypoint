@@ -151,7 +151,7 @@ describe("the two choices", () => {
     expect(onInstall).toHaveBeenCalledOnce();
   });
 
-  it("backs out", async () => {
+  it("declines", async () => {
     const onCancel = vi.fn();
     render(<ConfirmScreen plan={plan()} onInstall={noop} onCancel={onCancel} />);
 

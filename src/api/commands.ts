@@ -20,4 +20,6 @@ export const commands: Api = {
   openLogFolder: () => invoke<void>("open_log_folder"),
 
   logError: (message: string) => invoke<void>("log_error", { message }),
+
+  closeWindow: () => invoke<void>("close_window"),
 };

@@ -146,15 +146,4 @@ describe("planning", () => {
     expect(result.current.status.reason).toBe("plan");
     expect(result.current.status.message).toBe("Voice Chat isn't ready for Minecraft 26.2 yet.");
   });
-
-  it("goes back to found when the player declines", async () => {
-    const { result } = renderHook(() => useStartup());
-    await waitFor(() => expect(result.current.status.kind).toBe("found"));
-    await act(() => result.current.plan(dir, manifest));
-    await waitFor(() => expect(result.current.status.kind).toBe("confirm"));
-
-    act(() => result.current.cancelPlan(dir, manifest));
-
-    await waitFor(() => expect(result.current.status.kind).toBe("found"));
-  });
 });
