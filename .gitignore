@@ -27,3 +27,6 @@ dist-ssr
 CLAUDE.md
 AGENTS.md
 CONTRIBUTING.md
+
+# Test coverage reports
+coverage

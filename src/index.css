@@ -19,6 +19,9 @@
 
 /* Dark theme (default) */
 :root {
+  /* Native controls - are drawn by the OS, which picks light or dark from this. */
+  color-scheme: dark;
+
   --wp-bar: #101215;
   --wp-bar-border: #22262c;
   --wp-bar-text: #b3bac3;
@@ -46,6 +49,8 @@
 
 /* Light theme */
 [data-theme="light"] {
+  color-scheme: light;
+
   --wp-bar: #f2f0f7;
   --wp-bar-border: #e3e0ea;
   --wp-bar-text: #4a4552;
